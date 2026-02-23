@@ -28,7 +28,7 @@ Le projet doit répondre aux spécificités techniques suivantes :
 
 Le modèle de reconnaissance d'image sera implémenté dans un environnement qui lui sera dédié.
 Voici le diagramme de séquence associé à la partie IA pour le traitement des déchets :
-
+```mermaid
 sequenceDiagram
     Client->>Serveur: greener/upload/dechet
     Serveur->>RawImageSender: send_image(image)
@@ -37,7 +37,7 @@ sequenceDiagram
     Model-->>Serveur: Data: Material, trash bin color
     Serveur->>Client: Data: Material, trash bin color
     Note over Model, Serveur: ModelPipeline
-
+```
 Avec :
 
 - **RawImageSender** : Le composant qui va propager l'image brute dans l'enceinte du pipeline.
