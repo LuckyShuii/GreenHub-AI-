@@ -30,14 +30,13 @@ Le modèle de reconnaissance d'image sera implémenté dans un environnement qui
 Voici le diagramme de séquence associé à la partie IA pour le traitement des déchets :
 ```mermaid
 sequenceDiagram
-    Client->>Serveur: greener/upload/dechet
-    Serveur->>Viewer: get_response(image)
-    Viewer->>Controler: get_response_from_model(image)
+    Client->>Serveur(Viewer): greener/upload/dechet
+    Serveur(Viewer)->>Controler: get_response_from_model(image)
     Controler->>Model: predict_material(image)
     Model->>Controler: Response(material_name, bin_color)
-    Controler->>Serveur: Response(material_name, bin_color)
-    Serveur->>Client: Data: Response(material_name, bin_color)
-    Note over Model, Serveur: MCV DP
+    Controler->>Serveur(Viewer): Response(material_name, bin_color)
+    Serveur(Viewer)->>Client: Data: Response(material_name, bin_color)
+    Note over Model, Serveur(Viewer): MCV
 ```
 Avec :
 
@@ -50,7 +49,12 @@ Avec :
 Pour les technologies, le langage principal qui sera utilisé dans cette partie est le langage **Python**,
 pour sa popularité ainsi que sa richesse en modules de développement en IA. Pour le framework web,
 on utilisera **FastAPI** pour sa simplicité et ses performances. On utilisera également un modèle
-pré-entraîné de **Hugging Face** [lien du modèle](https://github.com/yuechen-yang/garbage-classification/tree/main).
+pré-entraîné de **Hugging Face** [lien du modèle](https://github.com/yuechen-yang/garbage-classification/tree/main) avec une précision de 95%.
 Pour la gestion des packages Python, on utilisera **uv**, qui est un gestionnaire de modules Python
 ultra-rapide codé en Rust.
 Enfin, pour le déploiement, le projet sera déployé sous forme de conteneurs **Docker**.
+
+## Perspectives
+Les perspectives pour ce projet sont :
+- Implémenter les tests
+- Implémenter un conteneur Docker
