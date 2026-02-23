@@ -10,9 +10,9 @@ Ce projet étudie la possibilité de mettre en place un pipeline IA pour le proj
 - Analyser des images de déchets 
  afin de les classifier.
 
-## Spécificités caractéristiques
+## Caractéristiques
 
-Ce projet doit répondre aux spécificités techniques suivantes :
+Ce projet doit avoir  les caractéristiques techniques suivantes :
 
 - Les modèles doivent être légers (taille raisonnable, à l'ordre maximum de centaines de mégaoctets).
 - Le modèle ne doit pas consommer une grande puissance de calcul, afin d'économiser les coûts et pour des raisons écologiques (**PAS DE LLMs**).
@@ -25,23 +25,24 @@ Le projet doit répondre aux spécificités techniques suivantes :
 - Séparation du modèle dans un environnement isolé distinct (conteneurs Docker).
 
 ## Architecture
-
+Le projet aura comme architecture MVC (Model, Controller, Viewer).
 Le modèle de reconnaissance d'image sera implémenté dans un environnement qui lui sera dédié.
 Voici le diagramme de séquence associé à la partie IA pour le traitement des déchets :
 ```mermaid
 sequenceDiagram
     Client->>Serveur: greener/upload/dechet
-    Serveur->>RawImageSender: send_image(image)
-    RawImageSender->>ImageGenerator: generate_model_image(image) (ajustement nb pixels)
-    ImageGenerator->>Model: predict(image)
-    Model-->>Serveur: Data: Material, trash bin color
-    Serveur->>Client: Data: Material, trash bin color
-    Note over Model, Serveur: ModelPipeline
+    Serveur->>Viewer: get_response(image)
+    Viewer->>Controler: get_response_from_model(image)
+    Controler->>Model: predict_material(image)
+    Model->>Controler: Response(material_name, bin_color)
+    Controler->>Serveur: Response(material_name, bin_color)
+    Serveur->>Client: Data: Response(material_name, bin_color)
+    Note over Model, Serveur: MCV DP
 ```
 Avec :
 
-- **RawImageSender** : Le composant qui va propager l'image brute dans l'enceinte du pipeline.
-- **ImageGenerator** : Le composant qui va ajuster les paramètres de l'image afin qu'elle soit conforme aux attentes de l'entrée du modèle.
+- **Viewer** : Interface de haut niveau avec laquelle le client interagit.
+- **Controller** : Il sert d'intermédiaire entre le Viewer et le Model.
 - **Model** : Le composant qui va prédire le contenu de l'image et le classifier selon les résultats de cette prédiction.
 
 ## Technologies
@@ -49,9 +50,7 @@ Avec :
 Pour les technologies, le langage principal qui sera utilisé dans cette partie est le langage **Python**,
 pour sa popularité ainsi que sa richesse en modules de développement en IA. Pour le framework web,
 on utilisera **FastAPI** pour sa simplicité et ses performances. On utilisera également un modèle
-pré-entraîné de **Hugging Face** ([lien du modèle](https://github.com/yuechen-yang/garbage-classification/tree/main).
-Enfin, pour la gestion du modèle, on utilisera le module **Keras**, qui est une plateforme de Machine
-Learning très pratique, et économique en temps de développement et en nombre de lignes de code.
+pré-entraîné de **Hugging Face** [lien du modèle](https://github.com/yuechen-yang/garbage-classification/tree/main).
 Pour la gestion des packages Python, on utilisera **uv**, qui est un gestionnaire de modules Python
 ultra-rapide codé en Rust.
 Enfin, pour le déploiement, le projet sera déployé sous forme de conteneurs **Docker**.

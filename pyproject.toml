@@ -1,0 +1,17 @@
+[project]
+name = "greener-ai-pipeline"
+version = "0.1.0"
+description = "AI plateform for the Greener project"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.131.0",
+    "keras>=3.13.2",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.22",
+    "tensorflow>=2.20.0",
+    "torch>=2.10.0",
+    "transformers>=5.2.0",
+    "uvicorn>=0.41.0",
+]
