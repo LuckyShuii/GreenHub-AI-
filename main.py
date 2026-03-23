@@ -13,7 +13,7 @@ PORT = os.getenv('PORT')
 servapp = Viewer()
 
 
-@servapp.post("/upload/predict")
+@servapp.post("/greener/upload/dechets")
 async def upload_file(file: UploadFile = File(...)) -> JSONResponse:
     content = await file.read()
     image = Image.open(io.BytesIO(content))
