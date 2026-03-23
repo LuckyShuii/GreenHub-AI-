@@ -8,5 +8,5 @@ COPY pyproject.toml .
 COPY uv.lock .
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 RUN uv sync
-CMD uv run python -m main.py
+CMD uv run python main.py
 
