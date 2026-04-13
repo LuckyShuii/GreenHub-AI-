@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 
 load_dotenv()
-HOST = os.getenv('HOST')
-PORT = os.getenv('PORT')
+HOST = os.getenv('HOST', '')
+PORT = int(os.getenv('PORT', ''))
 servapp = Viewer()
 
 
