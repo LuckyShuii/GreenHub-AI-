@@ -7,3 +7,5 @@ services:
       - WEB_PORT=${PORT}
     ports:
       - "${PORT}:${PORT}"
+    expose:
+      - WEB_PORT
