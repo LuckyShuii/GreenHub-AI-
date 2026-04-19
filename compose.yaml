@@ -5,7 +5,6 @@ services:
       - .env
     environment:
       - WEB_PORT=${PORT}
+      - WEB_HOST=${HOST}
     ports:
       - "${PORT}:${PORT}"
-    expose:
-      - WEB_PORT
