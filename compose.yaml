@@ -2,9 +2,11 @@ services:
   web:
     build: .
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       - WEB_PORT=${PORT}
       - WEB_HOST=${HOST}
+      - PIPELINE_MODEL_NAME=${PIPELINE_MODEL_NAME}
     ports:
       - "${PORT}:${PORT}"
