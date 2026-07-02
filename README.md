@@ -136,5 +136,4 @@ Enfin, pour le déploiement, le projet sera déployé sous forme de conteneurs *
 
 ## Perspectives
 Les perspectives pour ce projet sont :
-- Implémenter les tests
-- Implémenter un conteneur Docker
+- Envisager le remplacement du modèle d'IA actuel par un modèle plus performant ou mieux adapté aux besoins du projet
