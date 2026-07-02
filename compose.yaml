@@ -5,8 +5,8 @@ services:
       - path: .env
         required: false
     environment:
-      - WEB_PORT=${PORT}
-      - WEB_HOST=${HOST}
-      - PIPELINE_MODEL_NAME=${PIPELINE_MODEL_NAME}
+      - WEB_PORT=${AI_PORT}
+      - WEB_HOST=${AI_HOST}
+      - PIPELINE_MODEL_NAME=${AI_PIPELINE_MODEL_NAME}
     ports:
-      - "${PORT}:${PORT}"
+      - "${AI_PORT}:${AI_PORT}"

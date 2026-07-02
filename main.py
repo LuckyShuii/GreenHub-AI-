@@ -43,7 +43,7 @@ async def upload_file(file: UploadFile = File(...)) -> JSONResponse:
         response = await servapp.get_response(image)
     except UnknownMaterialError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -52,4 +52,4 @@ async def upload_file(file: UploadFile = File(...)) -> JSONResponse:
 
 if __name__ == "__main__":
     settings = get_settings()
-    uvicorn.run(app=servapp, host=settings.host, port=settings.port)
+    uvicorn.run(app=servapp, host=settings.ai_host, port=settings.ai_port)

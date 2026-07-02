@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --no-dev --frozen --no-install-project
 
 COPY ./src ./src
-COPY main.py ./
+COPY main.py configs.py ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --no-dev --frozen
 
@@ -18,6 +18,7 @@ WORKDIR /greener
 COPY --from=builder /greener/.venv /greener/.venv
 COPY --from=builder /greener/src /greener/src
 COPY --from=builder /greener/main.py /greener/main.py
+COPY --from=builder /greener/configs.py /greener/configs.py
 ENV PATH="/greener/.venv/bin:$PATH"
 
 ENTRYPOINT ["python", "main.py"]

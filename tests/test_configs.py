@@ -10,29 +10,29 @@ def test_settings_read_from_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Settings are populated from environment variables."""
-    monkeypatch.setenv("PIPELINE_MODEL_NAME", "test/model")
-    monkeypatch.setenv("HOST", "127.0.0.1")
-    monkeypatch.setenv("PORT", "9000")
+    monkeypatch.setenv("AI_PIPELINE_MODEL_NAME", "test/model")
+    monkeypatch.setenv("AI_HOST", "127.0.0.1")
+    monkeypatch.setenv("AI_PORT", "9000")
 
     settings = Settings(_env_file=None)  # type: ignore
 
-    assert settings.pipeline_model_name == "test/model"
-    assert settings.host == "127.0.0.1"
-    assert settings.port == 9000
+    assert settings.ai_pipeline_model_name == "test/model"
+    assert settings.ai_host == "127.0.0.1"
+    assert settings.ai_port == 9000
 
 
 def test_settings_apply_defaults(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Optional fields fall back to their defaults when unset."""
-    monkeypatch.setenv("PIPELINE_MODEL_NAME", "test/model")
-    monkeypatch.delenv("HOST", raising=False)
-    monkeypatch.delenv("PORT", raising=False)
+    monkeypatch.setenv("AI_PIPELINE_MODEL_NAME", "test/model")
+    monkeypatch.delenv("AI_HOST", raising=False)
+    monkeypatch.delenv("AI_PORT", raising=False)
 
     settings = Settings(_env_file=None)   # type: ignore
 
-    assert settings.host == "0.0.0.0"
-    assert settings.port == 8000
+    assert settings.ai_host == "0.0.0.0"
+    assert settings.ai_port == 8000
 
 
 def test_settings_missing_required_field_raises(
@@ -50,8 +50,8 @@ def test_settings_reject_out_of_range_port(
     monkeypatch: pytest.MonkeyPatch, invalid_port: str
 ) -> None:
     """Ports outside the valid TCP range are rejected."""
-    monkeypatch.setenv("PIPELINE_MODEL_NAME", "test/model")
-    monkeypatch.setenv("PORT", invalid_port)
+    monkeypatch.setenv("AI_PIPELINE_MODEL_NAME", "test/model")
+    monkeypatch.setenv("AI_PORT", invalid_port)
 
     with pytest.raises(ValidationError):  # type: ignore
         Settings(_env_file=None)   # type: ignore
@@ -61,7 +61,7 @@ def test_get_settings_is_cached(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """get_settings returns the same cached instance across calls."""
-    monkeypatch.setenv("PIPELINE_MODEL_NAME", "test/model")
+    monkeypatch.setenv("AI_PIPELINE_MODEL_NAME", "test/model")
     get_settings.cache_clear()
 
     first = get_settings()

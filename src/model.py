@@ -86,7 +86,7 @@ class Model:
         settings = get_settings()
         self.model = transformers.pipeline(
             "image-classification",
-            model=settings.pipeline_model_name,
+            model=settings.ai_pipeline_model_name,
         )
 
     def _run_inference(self, image: Image.Image) -> str:
