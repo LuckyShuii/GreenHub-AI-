@@ -10,16 +10,16 @@
 
 **1. Cloner le projet**
 
-\`\`\`bash
+```bash
 git clone git@github.com:LuckyShuii/GreenHub-AI-.git
 cd greener-ai-pipeline
-\`\`\`
+```
 
 **2. Créer l'environnement virtuel et installer les dépendances**
 
-\`\`\`bash
+```bash
 uv sync
-\`\`\`
+```
 
 Cette commande crée automatiquement un environnement virtuel (`.venv`) et installe toutes les dépendances définies dans `pyproject.toml` en se basant sur `uv.lock`.
 
@@ -29,9 +29,9 @@ Créez un fichier `.env` à la racine du projet avec les variables nécessaires 
 
 **4. Lancer le projet**
 
-\`\`\`bash
+```bash
 uv run python main.py
-\`\`\`
+```
 
 ---
 
@@ -43,27 +43,27 @@ Assurez-vous d'avoir un fichier `.env` à la racine du projet avec les variables
 
 **2. Build et lancement avec Docker Compose**
 
-\`\`\`bash
+bash
 docker compose up --build
-\`\`\`
+
 
 **3. Lancement en arrière-plan (mode détaché)**
 
-\`\`\`bash
+```bash
 docker compose up --build -d
-\`\`\`
+```
 
 **4. Arrêter les conteneurs**
 
-\`\`\`bash
+```bash
 docker compose down
-\`\`\`
+```
 
 **5. Voir les logs**
 
-\`\`\`bash
+```bash
 docker compose logs -f
-\`\`\`
+```
 
 ---
 
@@ -136,5 +136,5 @@ Enfin, pour le déploiement, le projet sera déployé sous forme de conteneurs *
 
 ## Perspectives
 Les perspectives pour ce projet sont :
-- Implémenter les tests
-- Implémenter un conteneur Docker
+- Envisager le remplacement du modèle d'IA actuel par un modèle plus performant ou mieux adapté aux besoins du projet
+
