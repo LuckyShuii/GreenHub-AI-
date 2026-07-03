@@ -3,30 +3,35 @@
 import io
 
 import uvicorn
-from fastapi import File, HTTPException, UploadFile, status
+from fastapi import File, Form, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 from PIL import Image, UnidentifiedImageError
 
 from configs import get_settings
-from src.model import UnknownMaterialError
+from src.model import UnknownRegionError, NoMatchError
 from src.viewer import Viewer
 
 servapp = Viewer()
 
 
 @servapp.post("/greener/upload/dechets")
-async def upload_file(file: UploadFile = File(...)) -> JSONResponse:
-    """Classify an uploaded waste image and return its bin color.
+async def upload_file(
+    file: UploadFile = File(...),
+    region: str = Form(...),
+) -> JSONResponse:
+    """Classify an uploaded waste image for a given region.
 
     Args:
         file: The uploaded image file.
+        region: The user's region, matching a Qdrant collection name.
 
     Returns:
         A JSON response with the material name and bin color.
 
     Raises:
-        HTTPException: If the file is not a valid image (400) or if the
-            material cannot be classified into a known bin (422).
+        HTTPException: If the file is not a valid image (400), if the
+            material cannot be classified (422), or if the region is
+            unknown (404).
 
     """
     content = await file.read()
@@ -40,8 +45,13 @@ async def upload_file(file: UploadFile = File(...)) -> JSONResponse:
         ) from exc
 
     try:
-        response = await servapp.get_response(image)
-    except UnknownMaterialError as exc:
+        response = await servapp.get_response(image, region)
+    except UnknownRegionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except NoMatchError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),

@@ -1,124 +1,145 @@
-"""Waste classification model wrapper with asynchronous inference support."""
+"""Waste classification model using Qdrant vector similarity search."""
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import ClassVar
 
 import pydantic
-import transformers
 from PIL import Image
+from qdrant_client import AsyncQdrantClient
 
 from configs import get_settings
-
-FR_BIN_COLOR_CODE: dict[str, str] = {
-    "cardboard": "Poubelle JAUNE (emballages)",
-    "glass": "Poubelle VERTE (verre)",
-    "metal": "Poubelle JAUNE (emballages)",
-    "paper": "Poubelle BLEUE (papier)",
-    "plastic": "Poubelle JAUNE (plastique)",
-    "trash": "Poubelle NOIRE (ordures)",
-    "organic": "Poubelle MARRON (biodechets)",
-}
+from src.embedder import ImageEmbedder
 
 
-class UnknownMaterialError(Exception):
-    """Raised when a predicted material has no known bin color mapping."""
+class UnknownRegionError(Exception):
+    """Raised when the requested region has no Qdrant collection."""
 
-    def __init__(self, material_name: str) -> None:
-        """Initialize the error with the offending material name.
+    def __init__(self, region: str) -> None:
+        """Initialize the error with the offending region name.
 
         Args:
-            material_name: The material label returned by the model that
-                could not be mapped to a bin color.
+            region: The region name that has no matching collection.
 
         """
-        self.material_name = material_name
-        super().__init__(f"Unknown material: {material_name}")
+        self.region = region
+        super().__init__(f"Unknown region: {region}")
+
+
+class NoMatchError(Exception):
+    """Raised when no similar reference vector is found in Qdrant."""
+
+    def __init__(self, region: str) -> None:
+        """Initialize the error with the searched region.
+
+        Args:
+            region: The region collection that returned no match.
+
+        """
+        self.region = region
+        super().__init__(f"No match found in region: {region}")
 
 
 class Response(pydantic.BaseModel):
     """Structured prediction response returned by the model.
 
     Attributes:
-        material_name: The lowercase label of the detected material.
-        bin_color: The French bin color instruction for the material.
+        material_name: The name of the detected waste item.
+        bin_color: The region-specific bin instruction.
+        score: The similarity score of the closest match.
 
     """
 
     material_name: str
     bin_color: str
-
-    @classmethod
-    def from_material(cls, material_name: str) -> "Response":
-        """Build a response from a raw material name.
-
-        Args:
-            material_name: The material label produced by the classifier.
-
-        Returns:
-            A fully populated Response instance.
-
-        Raises:
-            UnknownMaterialError: If the material has no bin mapping.
-
-        """
-        if material_name not in FR_BIN_COLOR_CODE:
-            raise UnknownMaterialError(material_name)
-        return cls(
-            material_name=material_name,
-            bin_color=FR_BIN_COLOR_CODE[material_name],
-        )
+    score: float
 
 
 class Model:
-    """Asynchronous wrapper around a Hugging Face
-    image-classification pipeline.
+    """Asynchronous waste classifier backed by Qdrant similarity search.
 
-    The blocking inference call is offloaded to a thread pool so that the
-    FastAPI event loop remains responsive under concurrent requests.
+    The image is embedded, then the region-specific collection is queried
+    for the nearest reference vector. The associated payload carries the
+    waste name and the region-specific bin color.
     """
 
     _executor: ClassVar[ThreadPoolExecutor] = ThreadPoolExecutor()
-    model: transformers.Pipeline
 
     def __init__(self) -> None:
-        """Initialize the classification pipeline from settings."""
+        """Initialize the embedder and the async Qdrant client."""
         settings = get_settings()
-        self.model = transformers.pipeline(
-            "image-classification",
-            model=settings.ai_pipeline_model_name,
+        self._embedder = ImageEmbedder(settings.embedding_model_name,
+                                       settings.device)
+        self._client = AsyncQdrantClient(
+            host=settings.qdrant_host,
+            port=settings.qdrant_port,
         )
 
-    def _run_inference(self, image: Image.Image) -> str:
-        """Run the synchronous pipeline and extract the top label.
+    async def _embed_image(self, image: Image.Image) -> list[float]:
+        """Embed an image synchronously in a worker thread.
 
         Args:
-            image: The PIL image to classify.
+            image: The PIL image to embed.
 
         Returns:
-            The lowercase label with the highest score.
+            The embedding vector as a list of floats.
 
         """
-        result = self.model(image)
-        return result[0]["label"].lower()
+        return await self._embedder.embed(image)
 
-    async def predict_material(self, image: Image.Image) -> Response:
-        """Asynchronously classify an image and map it to a bin color.
+    async def _collection_exists(self, region: str) -> bool:
+        """Check whether the region collection exists in Qdrant.
+
+        Args:
+            region: The region name used as the collection name.
+
+        Returns:
+            True if the collection exists, False otherwise.
+
+        """
+        return await self._client.collection_exists(region)
+
+    async def predict_material(
+        self, image: Image.Image, region: str
+    ) -> Response:
+        """Classify an image against a region-specific collection.
 
         Args:
             image: The PIL image to classify.
+            region: The region whose collection is queried.
 
         Returns:
-            A Response holding the material name and its bin color.
+            A Response with the waste name, bin color, and score.
 
         Raises:
-            UnknownMaterialError: If the predicted material is unmapped.
+            UnknownRegionError: If the region collection does not exist.
+            NoMatchError: If the search returns no result.
 
         """
+        if not await self._collection_exists(region):
+            raise UnknownRegionError(region)
+
         loop = asyncio.get_running_loop()
-        material_name = await loop.run_in_executor(
+        vector = await loop.run_in_executor(
             self._executor,
-            self._run_inference,
+            self._embed_image,
             image,
         )
-        return Response.from_material(material_name)
+
+        results = await self._client.query_points(
+            collection_name=region,
+            query_vector=vector,
+            limit=1,
+            with_payload=True,
+        )
+
+        if not results:
+            raise NoMatchError(region)
+
+        best = results[0]
+        payload = best.payload or {}
+        return Response(
+            material_name=str(payload.get("nom", "unknown")),
+            bin_color=str(payload.get("poubelle", "unknown")),
+            score=float(best.score),
+        )

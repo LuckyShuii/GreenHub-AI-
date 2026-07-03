@@ -14,7 +14,7 @@ class Controler:
         """Instantiate the underlying model wrapper."""
         self.model = Model()
 
-    async def get_model_response(self, image: Image.Image) -> Response:
+    async def get_model_response(self, image: Image.Image, region: str) -> Response:
         """Delegate classification to the model asynchronously.
 
         Args:
