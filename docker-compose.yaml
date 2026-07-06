@@ -15,11 +15,10 @@ services:
       - QDRANT_GRPC_PORT=${QDRANT_GRPC_PORT}
     ports:
       - "${AI_PORT}:${AI_PORT}"
-    depends_on:
-      qdrant:
-        condition: service_healthy
-    networks:
-      - greener_net
+    volumes:
+      - ./images:/greener/images
+      - ./backup_images:/greener/backup_images
+      - ./data:/greener/data
 
   qdrant:
     build:
@@ -40,18 +39,9 @@ services:
       - "${QDRANT_GRPC_PORT}:${QDRANT_GRPC_PORT}"
     volumes:
       - qdrant_storage:/qdrant/storage
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "--no-check-certificate", "http://localhost:${QDRANT_PORT}/healthz"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    networks:
-      - greener_net
 
 volumes:
   qdrant_storage:
-
-networks:
-  greener_net:
-    driver: bridge
+  images:
+  backup_images:
+  data:

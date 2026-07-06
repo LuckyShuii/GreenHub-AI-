@@ -36,20 +36,14 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
-
-    ai_pipeline_model_name: str = Field(
-        ...,
-        alias="PIPELINE_MODEL_NAME",
-        description="Hugging Face image-classification model name.",
-    )
     ai_host: str = Field(
         default="0.0.0.0",
-        alias="HOST",
+        alias="AI_HOST",
         description="Server bind address.",
     )
     ai_port: int = Field(
         default=8000,
-        alias="PORT",
+        alias="AI_PORT",
         ge=1,
         le=65535,
         description="Server listening port.",

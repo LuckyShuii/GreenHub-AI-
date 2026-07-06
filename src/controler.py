@@ -24,4 +24,4 @@ class Controler:
             The model Response for the given image.
 
         """
-        return await self.model.predict_material(image)
+        return await self.model.predict_material(image, region)

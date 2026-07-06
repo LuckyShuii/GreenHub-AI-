@@ -4,11 +4,11 @@ import asyncio
 
 import httpx
 
-from embedder import ImageEmbedder
-from fetcher import ImageFetcher
+from .embedder import ImageEmbedder
+from .fetcher import ImageFetcher
 from logging_config import get_logger
-from repository import VectorRepository
-from schemas import QdrantPayload, QdrantPoint
+from .repository import VectorRepository
+from .schemas import QdrantPayload, QdrantPoint
 
 logger = get_logger(__name__)
 

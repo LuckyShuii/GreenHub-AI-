@@ -128,7 +128,7 @@ class Model:
 
         results = await self._client.query_points(
             collection_name=region,
-            query_vector=vector,
+            query= await vector,
             limit=1,
             with_payload=True,
         )
@@ -136,7 +136,7 @@ class Model:
         if not results:
             raise NoMatchError(region)
 
-        best = results[0]
+        best = results.points[0]
         payload = best.payload or {}
         return Response(
             material_name=str(payload.get("nom", "unknown")),

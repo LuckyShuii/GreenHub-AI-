@@ -8,9 +8,9 @@ import logging
 from pathlib import Path
 
 import httpx
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 from PIL import Image, UnidentifiedImageError
-
+import time
 logger = logging.getLogger(__name__)
 
 
@@ -52,6 +52,7 @@ class ImageFetcher:
         """
         try:
             with DDGS() as ddgs:
+                time.sleep(2)
                 results = ddgs.images(query, max_results=count)
             return [item["image"] for item in results]
         except Exception as error:  # noqa: BLE001
