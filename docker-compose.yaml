@@ -5,12 +5,11 @@ services:
     build: .
     env_file:
       - path: .env
-        required: false
+        required: True
     environment:
-      - WEB_HOST=${AI_HOST}                
+      - WEB_HOST=${AI_HOST}
       - WEB_PORT=${AI_PORT}
-      - PIPELINE_MODEL_NAME=${AI_PIPELINE_MODEL_NAME}
-      - QDRANT_HOST=${QDRANT_HOST}
+      - QDRANT_HOST=qdrant
       - QDRANT_PORT=${QDRANT_PORT}
       - QDRANT_GRPC_PORT=${QDRANT_GRPC_PORT}
     ports:
@@ -19,6 +18,9 @@ services:
       - ./images:/greener/images
       - ./backup_images:/greener/backup_images
       - ./data:/greener/data
+    depends_on:
+      qdrant:
+        condition: service_healthy
 
   qdrant:
     build:
@@ -28,7 +30,7 @@ services:
         QDRANT_VERSION: ${QDRANT_VERSION}
     env_file:
       - path: .env
-        required: false
+        required: True
     environment:
       - QDRANT__SERVICE__HOST=${QDRANT_HOST}
       - QDRANT__SERVICE__HTTP_PORT=${QDRANT_PORT}

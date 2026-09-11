@@ -52,7 +52,7 @@ class ImageFetcher:
         """
         try:
             with DDGS() as ddgs:
-                time.sleep(2)
+                time.sleep(5)
                 results = ddgs.images(query, max_results=count)
             return [item["image"] for item in results]
         except Exception as error:  # noqa: BLE001

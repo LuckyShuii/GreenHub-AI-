@@ -17,8 +17,8 @@ EXPOSE ${QDRANT_PORT}
 EXPOSE ${QDRANT_GRPC_PORT}
 
 
-#HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=15s \
-#    CMD curl -f http://${QDRANT_HOST}:${QDRANT_PORT}/healthz || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=15s \
+    CMD curl -f http://${QDRANT_HOST}:${QDRANT_PORT}/healthz || exit 1
 
 WORKDIR /qdrant
 
